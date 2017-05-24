@@ -3,6 +3,8 @@
 
 extern crate glutin_window;
 extern crate graphics;
+#[macro_use]
+extern crate lazy_static;
 extern crate music;
 extern crate opengl_graphics;
 extern crate piston;
@@ -10,13 +12,13 @@ extern crate rand;
 
 use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL};
-use piston::event_loop::{EventSettings, Events};
 use piston::window::{Size, WindowSettings};
 
 mod game;
 mod menu;
 mod settings;
 mod story;
+mod traits;
 
 /// Creates a new window and runs the game starts the main menu.
 fn main() {
@@ -39,10 +41,5 @@ fn main() {
 
     let mut gl = GlGraphics::new(opengl);
 
-    let mut events = Events::new(EventSettings::default());
-    menu::run(&mut events,
-              &mut window,
-              &mut gl,
-              game_title,
-              game_window_size);
+    menu::run(&mut window, &mut gl, game_title, game_window_size);
 }

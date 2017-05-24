@@ -4,10 +4,10 @@ use glutin_window::GlutinWindow;
 use graphics::{clear, Context, text, Transformed, types};
 use opengl_graphics::GlGraphics;
 use opengl_graphics::glyph_cache::GlyphCache;
-use piston::event_loop::Events;
 use piston::input::{Button, Input, Key};
 
 use game::color::{self, ColoredText};
+use traits::GlutinWindowExt;
 
 fn draw(context: Context, graphics: &mut GlGraphics, glyph_cache: &mut GlyphCache) {
     const NARRATOR_COLOR: types::Color = color::WHITE;
@@ -127,11 +127,8 @@ fn draw(context: Context, graphics: &mut GlGraphics, glyph_cache: &mut GlyphCach
 }
 
 /// Loop displaying the story until the user exits.
-pub fn run(events: &mut Events,
-           window: &mut GlutinWindow,
-           opengl: &mut GlGraphics,
-           glyph_cache: &mut GlyphCache) {
-    while let Some(event) = events.next(window) {
+pub fn run(window: &mut GlutinWindow, opengl: &mut GlGraphics, glyph_cache: &mut GlyphCache) {
+    while let Some(event) = window.next() {
         match event {
             Input::Render(args) => {
                 opengl.draw(args.viewport(),

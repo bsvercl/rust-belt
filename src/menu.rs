@@ -6,7 +6,6 @@ use graphics::{clear, Context, text, Transformed};
 use music;
 use opengl_graphics::GlGraphics;
 use opengl_graphics::glyph_cache::GlyphCache;
-use piston::event_loop::Events;
 use piston::input::{Button, Input, Key};
 use piston::window::Size;
 
@@ -14,6 +13,7 @@ use game;
 use game::color::{self, ColoredText};
 use settings;
 use story;
+use traits::GlutinWindowExt;
 
 /// The different soundtrack pieces in the game.
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
@@ -106,8 +106,7 @@ fn draw(context: Context,
 }
 
 /// Loops the menu screen, taking user input to change the current menu selection.
-pub fn run(mut events: &mut Events,
-           mut window: &mut GlutinWindow,
+pub fn run(mut window: &mut GlutinWindow,
            mut opengl: &mut GlGraphics,
            game_title: &'static str,
            window_size: Size) {
@@ -126,7 +125,7 @@ pub fn run(mut events: &mut Events,
 
         let menu_align = (window_size.width / 2 - 120) as f64;
 
-        while let Some(event) = events.next(window) {
+        while let Some(event) = window.next() {
             match event {
                 Input::Render(args) => {
                     opengl.draw(args.viewport(), |context, graphics| {
@@ -161,21 +160,15 @@ pub fn run(mut events: &mut Events,
                             match menu_selection {
                                 MenuSelection::Play => {
                                     music::play(&Music::Action, music::Repeat::Forever);
-                                    game::Game::new(window_size).run(&mut events,
-                                                                     &mut window,
-                                                                     &mut opengl,
-                                                                     &mut glyph_cache);
+                                    game::Game::new(window_size)
+                                        .run(&mut window, &mut opengl, &mut glyph_cache);
                                     music::play(&Music::Menu, music::Repeat::Forever);
                                 }
                                 MenuSelection::Story => {
-                                    story::run(&mut events,
-                                               &mut window,
-                                               &mut opengl,
-                                               &mut glyph_cache);
+                                    story::run(&mut window, &mut opengl, &mut glyph_cache);
                                 }
                                 MenuSelection::Settings => {
-                                    settings::run(&mut events,
-                                                  &mut window,
+                                    settings::run(&mut window,
                                                   &mut opengl,
                                                   &mut glyph_cache,
                                                   &mut volume,
