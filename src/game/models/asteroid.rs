@@ -1,8 +1,7 @@
 //! This module defines the asteroid component.
 use std::{cmp, f64};
 
-use opengl_graphics::GlGraphics;
-use piston_window::{Context, polygon, Size, Transformed, UpdateArgs};
+use piston_window::{Context, G2d, polygon, Size, Transformed, UpdateArgs};
 use rand;
 
 use game::color;
@@ -180,7 +179,7 @@ impl Updateable for Asteroid {
 }
 
 impl Drawable for Asteroid {
-    fn draw(&self, context: Context, graphics: &mut GlGraphics) {
+    fn draw(&self, context: Context, graphics: &mut G2d) {
 
         // This polygon is the "main" asteroid shape within the frame. It is
         // drawn at the location specified in `pos`. The Vec<[f64; 2]> type,

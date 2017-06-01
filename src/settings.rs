@@ -1,16 +1,15 @@
 //! Modify game settings.
 
 use music;
-use opengl_graphics::GlGraphics;
-use opengl_graphics::glyph_cache::GlyphCache;
-use piston_window::{Button, Context, clear, Input, Key, PistonWindow, text, Transformed};
+use piston_window::{Button, Context, clear, G2d, Glyphs, Input, Key, PistonWindow, text,
+                    Transformed};
 
 use game::color;
 use menu::Sound;
 
 fn draw(context: Context,
-        graphics: &mut GlGraphics,
-        glyph_cache: &mut GlyphCache,
+        graphics: &mut G2d,
+        glyphs: &mut Glyphs,
         volume: f64,
         left_alignment: f64) {
     let starting_line_offset = 280.0;
@@ -20,7 +19,7 @@ fn draw(context: Context,
     text(color::WHITE,
          32,
          "Volume",
-         glyph_cache,
+         glyphs,
          context
              .transform
              .trans(left_alignment, starting_line_offset),
@@ -28,7 +27,7 @@ fn draw(context: Context,
     text(color::WHITE,
          32,
          &format!("{}%", (volume * 100.0) as i32),
-         glyph_cache,
+         glyphs,
          context
              .transform
              .trans(value_left_alignment, starting_line_offset),
@@ -36,18 +35,16 @@ fn draw(context: Context,
 }
 
 /// Loop providing game setting options to change to the user until they exit the screen.
-pub fn run(window: &mut PistonWindow,
-           opengl: &mut GlGraphics,
-           glyph_cache: &mut GlyphCache,
-           volume: &mut f64,
-           left_alignment: f64) {
+pub fn run(window: &mut PistonWindow, glyphs: &mut Glyphs, volume: &mut f64, left_alignment: f64) {
     while let Some(event) = window.next() {
 
         match event {
-            Input::Render(args) => {
-                opengl.draw(args.viewport(), |context, graphics| {
-                    draw(context, graphics, glyph_cache, *volume, left_alignment)
-                });
+            Input::Render(_) => {
+                window
+                    .draw_2d(&event, |context, graphics| {
+                        draw(context, graphics, glyphs, *volume, left_alignment);
+                    })
+                    .unwrap();
             }
 
             // TODO: Known precision problem related to stepping f64 instead of integers.

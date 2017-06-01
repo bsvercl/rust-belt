@@ -2,9 +2,8 @@
 //! Provides an interface for the user to start the game, change settings, or exit.
 
 use music;
-use opengl_graphics::GlGraphics;
-use opengl_graphics::glyph_cache::GlyphCache;
-use piston_window::{Button, clear, Context, Input, Key, PistonWindow, text, Transformed, Size};
+use piston_window::{Button, clear, Context, Glyphs, G2d, Input, Key, PistonWindow, text,
+                    Transformed, Size};
 
 use game;
 use game::color::{self, ColoredText};
@@ -62,8 +61,8 @@ enum MenuSelection {
 /// Draws the title and menu options to screen.
 /// The current menu selection is highlighted based upon user input.
 fn draw(context: Context,
-        graphics: &mut GlGraphics,
-        glyph_cache: &mut GlyphCache,
+        graphics: &mut G2d,
+        glyphs: &mut Glyphs,
         menu_align: f64,
         menu_selection: MenuSelection,
         game_title: &str) {
@@ -102,7 +101,7 @@ fn draw(context: Context,
     text(color::WHITE,
          72,
          game_title,
-         glyph_cache,
+         glyphs,
          context.transform.trans(menu_align, starting_line_offset),
          graphics);
 
@@ -111,27 +110,24 @@ fn draw(context: Context,
         text(line.color,
              32,
              line.text,
-             glyph_cache,
-             context
-                 .transform
-                 .trans(menu_align,
-                        starting_line_offset + ((index as f64 + 1.0) * new_line_offset)),
+             glyphs,
+             context.transform.trans(menu_align,
+                                     starting_line_offset +
+                                     ((index as f64 + 1.0) * new_line_offset)),
              graphics);
     }
 }
 
 /// Loops the menu screen, taking user input to change the current menu selection.
-pub fn run(mut window: &mut PistonWindow,
-           mut opengl: &mut GlGraphics,
-           game_title: &str,
-           window_size: Size) {
+pub fn run(mut window: &mut PistonWindow, game_title: &str, window_size: Size) {
     music::start::<Music, Sound, _>(|| {
         bind_sound_files();
         music::play_music(&Music::Menu, music::Repeat::Forever);
 
         // The glyphe cache is mutable because it loads each character on demand (lazily),
         // and thus must be able to be changed over time as new characters are requested.
-        let mut glyph_cache = GlyphCache::new("./assets/FiraSans-Regular.ttf").unwrap();
+        let mut glyphs = Glyphs::new("./assets/FiraSans-Regular.ttf", window.factory.clone())
+            .unwrap();
 
         let mut menu_selection = MenuSelection::Play;
         let mut volume = music::MAX_VOLUME;
@@ -140,15 +136,17 @@ pub fn run(mut window: &mut PistonWindow,
         let menu_align = (window_size.width / 2 - 120) as f64;
         while let Some(event) = window.next() {
             match event {
-                Input::Render(args) => {
-                    opengl.draw(args.viewport(), |context, graphics| {
-                        draw(context,
-                             graphics,
-                             &mut glyph_cache,
-                             menu_align,
-                             menu_selection,
-                             game_title)
-                    });
+                Input::Render(_) => {
+                    window
+                        .draw_2d(&event, |context, graphics| {
+                            draw(context,
+                                 graphics,
+                                 &mut glyphs,
+                                 menu_align,
+                                 menu_selection,
+                                 game_title);
+                        })
+                        .unwrap();
                 }
 
                 Input::Press(Button::Keyboard(key)) => {
@@ -175,17 +173,15 @@ pub fn run(mut window: &mut PistonWindow,
                             match menu_selection {
                                 MenuSelection::Play => {
                                     music::play_music(&Music::Action, music::Repeat::Forever);
-                                    game::Game::new(window_size)
-                                        .run(&mut window, &mut opengl, &mut glyph_cache);
+                                    game::Game::new(window_size).run(&mut window, &mut glyphs);
                                     music::play_music(&Music::Menu, music::Repeat::Forever);
                                 }
                                 MenuSelection::Story => {
-                                    story::run(&mut window, &mut opengl, &mut glyph_cache);
+                                    story::run(&mut window, &mut glyphs);
                                 }
                                 MenuSelection::Settings => {
                                     settings::run(&mut window,
-                                                  &mut opengl,
-                                                  &mut glyph_cache,
+                                                  &mut glyphs,
                                                   &mut volume,
                                                   menu_align);
                                 }

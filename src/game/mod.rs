@@ -7,10 +7,8 @@
 //! and handles collision detection and the TTL for `Bullet`s.
 
 use music;
-use opengl_graphics::GlGraphics;
-use opengl_graphics::glyph_cache::GlyphCache;
-use piston_window::{Button, clear, Context, Input, Key, PistonWindow, Size, text, Transformed,
-                    UpdateArgs};
+use piston_window::{Button, clear, Context, G2d, Glyphs, Input, Key, PistonWindow, Size, text,
+                    Transformed, UpdateArgs};
 
 use self::models::{asteroid, bullet, Collidable, Drawable, player, Updateable};
 use menu::Sound;
@@ -49,15 +47,14 @@ impl Game {
         }
     }
 
-    pub fn run(&mut self,
-               window: &mut PistonWindow,
-               opengl: &mut GlGraphics,
-               glyph_cache: &mut GlyphCache) {
+    pub fn run(&mut self, window: &mut PistonWindow, glyphs: &mut Glyphs) {
         while let Some(event) = window.next() {
             match event {
-                Input::Render(args) => {
-                    opengl.draw(args.viewport(),
-                                |context, graphics| self.draw(context, graphics, glyph_cache));
+                Input::Render(_) => {
+                    window
+                        .draw_2d(&event,
+                                 |context, graphics| self.draw(context, graphics, glyphs))
+                        .unwrap();
                 }
 
                 Input::Update(args) => {
@@ -100,7 +97,7 @@ impl Game {
     }
 
     /// Draws all current live objects onto the screen as well as the current score.
-    fn draw(&self, context: Context, graphics: &mut GlGraphics, glyph_cache: &mut GlyphCache) {
+    fn draw(&self, context: Context, graphics: &mut G2d, glyph_cache: &mut Glyphs) {
         clear(color::BLACK, graphics);
         for bullet in &self.bullets {
             bullet.draw(context, graphics);
@@ -124,11 +121,10 @@ impl Updateable for Game {
         self.player.update(args);
         if self.player.should_shoot() {
             music::play_sound(&Sound::WeaponShoot, music::Repeat::Times(0));
-            self.bullets
-                .push(bullet::Bullet::new(self.player.pos,
-                                          self.player.vel,
-                                          self.player.rot,
-                                          self.window_size));
+            self.bullets.push(bullet::Bullet::new(self.player.pos,
+                                                  self.player.vel,
+                                                  self.player.rot,
+                                                  self.window_size));
             self.player.reset_weapon_cooldown();
         }
 

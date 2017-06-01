@@ -7,8 +7,7 @@
 
 use std::f64;
 
-use opengl_graphics::GlGraphics;
-use piston_window::{Context, polygon, Size, Transformed, types, UpdateArgs};
+use piston_window::{Context, G2d, polygon, Size, Transformed, types, UpdateArgs};
 
 use game::color;
 use game::models::{Collidable, Drawable, PI_MULT_2, Positioned, Updateable};
@@ -127,7 +126,7 @@ const SHIP: &types::Triangle = &[[0.0, -1.0 * SHIP_HEIGHT / 2.0],
                                  [SHIP_WIDTH, 0.0],
                                  [0.0, SHIP_HEIGHT / 2.0]];
 impl Drawable for Player {
-    fn draw(&self, context: Context, graphics: &mut GlGraphics) {
+    fn draw(&self, context: Context, graphics: &mut G2d) {
         const BOOSTER_HEIGHT: f64 = 8.0;
         const BOOSTER_WIDTH: f64 = 10.0;
         const BOOSTER: &types::Triangle = &[[0.0, -1.0 * BOOSTER_HEIGHT / 2.0],

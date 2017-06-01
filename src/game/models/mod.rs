@@ -3,8 +3,7 @@
 use std::f64;
 use std::f64::consts::PI;
 
-use opengl_graphics::GlGraphics;
-use piston_window::{Context, UpdateArgs};
+use piston_window::{Context, G2d, UpdateArgs};
 
 pub mod asteroid;
 pub mod bullet;
@@ -16,7 +15,7 @@ const PI_MULT_2: f64 = 2.0 * PI;
 /// Trait implemented by types that can be drawn to a window.
 pub trait Drawable {
     /// Draws oneself to the screen.
-    fn draw(&self, context: Context, graphics: &mut GlGraphics);
+    fn draw(&self, context: Context, graphics: &mut G2d);
 }
 
 /// Trait implemented by types that are updated by a game loop.
@@ -45,7 +44,8 @@ pub trait Collidable: Positioned {
     /// Check another `Collidable` type to see if it's radius overlaps with this instance's.
     fn collides_with<C: Collidable>(&self, other: &C) -> bool {
         // The Distance Formula.
-        let distance = ((self.x() - other.x()).powi(2) + (self.y() - other.y()).powi(2)).sqrt();
+        let distance = ((self.x() - other.x()).powi(2) + (self.y() - other.y()).powi(2))
+            .sqrt();
         distance < self.radius() + other.radius()
     }
 }

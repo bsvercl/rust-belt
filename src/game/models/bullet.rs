@@ -5,8 +5,7 @@
 //! responsible for removing themselves or handling collisions with
 //! other models.
 
-use opengl_graphics::GlGraphics;
-use piston_window::{Context, ellipse, Size, Transformed, types, UpdateArgs};
+use piston_window::{Context, ellipse, G2d, Size, Transformed, types, UpdateArgs};
 
 use game::color;
 use game::models::{Collidable, Drawable, Positioned, Updateable};
@@ -48,7 +47,7 @@ impl Updateable for Bullet {
 
 const BULLET_DIAMETER: f64 = 3.0;
 impl Drawable for Bullet {
-    fn draw(&self, context: Context, graphics: &mut GlGraphics) {
+    fn draw(&self, context: Context, graphics: &mut G2d) {
         const BULLET: types::Rectangle = [0.0, 0.0, BULLET_DIAMETER, BULLET_DIAMETER];
 
         ellipse(color::WHITE,

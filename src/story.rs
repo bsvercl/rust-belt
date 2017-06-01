@@ -1,14 +1,13 @@
 //! Displays the story dialogue.
 
 use music;
-use opengl_graphics::GlGraphics;
-use opengl_graphics::glyph_cache::GlyphCache;
-use piston_window::{Button, clear, Context, Input, Key, PistonWindow, text, Transformed, types};
+use piston_window::{Button, clear, Context, G2d, Glyphs, Input, Key, PistonWindow, text,
+                    Transformed, types};
 
 use game::color::{self, ColoredText};
 use menu::Sound;
 
-fn draw(context: Context, graphics: &mut GlGraphics, glyph_cache: &mut GlyphCache) {
+fn draw(context: Context, graphics: &mut G2d, glyphs: &mut Glyphs) {
     const NARRATOR_COLOR: types::Color = color::WHITE;
     const KARA_COLOR: types::Color = color::MAGENTA;
     const JACK_COLOR: types::Color = color::CYAN;
@@ -116,22 +115,22 @@ fn draw(context: Context, graphics: &mut GlGraphics, glyph_cache: &mut GlyphCach
         text(line.color,
              22,
              line.text,
-             glyph_cache,
-             context
-                 .transform
-                 .trans(left_indent,
-                        starting_line_offset + (index as f64 * new_line_offset)),
+             glyphs,
+             context.transform.trans(left_indent,
+                                     starting_line_offset + (index as f64 * new_line_offset)),
              graphics);
     }
 }
 
 /// Loop displaying the story until the user exits.
-pub fn run(window: &mut PistonWindow, opengl: &mut GlGraphics, glyph_cache: &mut GlyphCache) {
+pub fn run(window: &mut PistonWindow, glyphs: &mut Glyphs) {
     while let Some(event) = window.next() {
         match event {
             Input::Render(args) => {
-                opengl.draw(args.viewport(),
-                            |context, graphics| draw(context, graphics, glyph_cache));
+                window
+                    .draw_2d(&event,
+                             |context, graphics| { draw(context, graphics, glyphs); })
+                    .unwrap();
             }
 
             Input::Press(Button::Keyboard(key)) => {
